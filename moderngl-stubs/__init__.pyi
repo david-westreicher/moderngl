@@ -1842,6 +1842,7 @@ class Context:
             components (int): The number of components 1, 2, 3 or 4.
             data (bytes): Content of the texture. The size must be ``(width, height * layers)``
                             so each layer is stacked vertically.
+            create_mip_maps (bool): Create full (uninitialized) mip chain of 3D texture.
 
         Keyword Args:
             alignment (int): The byte alignment 1, 2, 4 or 8.
@@ -1857,6 +1858,7 @@ class Context:
         data: Optional[Any] = None,
         alignment: int = 1,
         dtype: str = "f1",
+        create_mip_maps: bool = False,
     ) -> Texture3D:
         """
         Create a :py:class:`Texture3D` object.

@@ -1971,13 +1971,13 @@ class Context:
         res.extra = None
         return res
 
-    def texture3d(self, size, components, data=None, alignment=1, dtype="f1"):
+    def texture3d(self, size, components, data=None, alignment=1, dtype="f1", create_mip_maps=False):
         res = Texture3D.__new__(Texture3D)
         res._size = size
         res._components = components
         res._dtype = dtype
         res.mglo, res._glo = self.mglo.texture3d(
-            size, components, data, alignment, dtype
+            size, components, data, alignment, dtype, create_mip_maps
         )
         res.ctx = self
         res.extra = None

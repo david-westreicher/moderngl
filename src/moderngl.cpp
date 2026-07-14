@@ -4673,16 +4673,19 @@ static PyObject * MGLContext_texture3d(MGLContext * self, PyObject * args) {
 
     const char * dtype;
 
+    int create_mip_maps;
+
     int args_ok = PyArg_ParseTuple(
         args,
-        "(III)IOIs",
+        "(III)IOIsp",
         &width,
         &height,
         &depth,
         &components,
         &data,
         &alignment,
-        &dtype
+        &dtype,
+        &create_mip_maps
     );
 
     if (!args_ok) {
@@ -4754,7 +4757,38 @@ static PyObject * MGLContext_texture3d(MGLContext * self, PyObject * args) {
 
     gl.PixelStorei(GL_PACK_ALIGNMENT, alignment);
     gl.PixelStorei(GL_UNPACK_ALIGNMENT, alignment);
-    gl.TexImage3D(GL_TEXTURE_3D, 0, internal_format, width, height, depth, 0, base_format, pixel_type, buffer_view.buf);
+    
+    int mip = 0;
+    int mipWidth = width;
+    int mipHeight = height;
+    int mipDepth = depth;
+    while (true)
+    {
+        printf("build mip %d\n", mipWidth);
+        gl.TexImage3D(
+            GL_TEXTURE_3D,
+            mip++,
+            internal_format,
+            mipWidth,
+            mipHeight,
+            mipDepth,
+            0,
+            base_format,
+            pixel_type,
+            (mip == 0) ? buffer_view.buf: NULL
+        );
+
+        if (!create_mip_maps)
+            break;
+
+        if (mipWidth == 1 && mipHeight == 1 && mipDepth == 1)
+            break;
+
+        mipWidth  = MGL_MAX(1, mipWidth  / 2);
+        mipHeight = MGL_MAX(1, mipHeight / 2);
+        mipDepth  = MGL_MAX(1, mipDepth  / 2);
+    }
+
     if (data_type->float_type) {
         gl.TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         gl.TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
